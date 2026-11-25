@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "JAPAN TRAVEL",
+  "short_name": "Japan Travel",
+  "description": "La tua guida personale per il Giappone 2027",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf5e9",
+  "theme_color": "#782f32",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

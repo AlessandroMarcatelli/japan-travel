@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#782f32">
+<meta name="description" content="La tua guida personale per il viaggio in Giappone">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<title>JAPAN TRAVEL 🇯🇵</title>
+<style>
+:root {
+  --red:#782f32;
+  --red2:#9c4945;
+  --cream:#faf5e9;
+  --paper:#fffdf7;
+  --ink:#302b27;
+  --gold:#bd9650;
+  --muted:#82796d;
+  --line:#e8dfcf;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--cream);color:var(--ink);
+  font-family:system-ui,-apple-system,sans-serif;
+  padding-bottom:85px;
+}
+header{
+  background:var(--red);color:#fff8e9;
+  padding:24px 19px 20px;
+  border-bottom:5px solid var(--gold);
+}
+.brand{font-size:12px;letter-spacing:4px;color:#e8cfa7}
+h1{font-family:Georgia,serif;font-size:29px;margin:8px 0}
+header p{font-size:13px;color:#f0dfcc;margin:5px 0}
+.hero{
+  background:linear-gradient(135deg,#873b39,#422d2b);
+  color:white;padding:19px;border-radius:15px;
+  margin-top:17px;
+}
+.hero strong{font:26px Georgia,serif}
+main{padding:17px;max-width:720px;margin:auto}
+h2{font:22px Georgia,serif;color:var(--red);margin:8px 0 15px}
+h3{font-size:16px;margin:5px 0}
+.card{
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:14px;padding:15px;margin-bottom:12px;
+  box-shadow:0 2px 8px #4a352008;
+}
+.small{font-size:12px;color:var(--muted);line-height:1.6}
+.tag{
+  display:inline-block;background:#f1e4ce;color:#76522e;
+  border-radius:20px;padding:4px 9px;font-size:11px;
+  margin:3px 3px 3px 0;
+}
+button{
+  border:0;border-radius:10px;padding:11px 14px;
+  background:var(--red);color:white;font-weight:600;
+  cursor:pointer;font-size:13px;
+}
+button.secondary{background:#eee5d6;color:var(--ink)}
+button:active{opacity:.75}
+input,textarea,select{
+  width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:9px;background:white;color:var(--ink);
+  font:inherit;margin:5px 0 10px;
+}
+textarea{min-height:90px;resize:vertical}
+label{font-size:12px;font-weight:600}
+nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#fffdf7;border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;
+  padding:9px 2px calc(9px + env(safe-area-inset-bottom));
+  z-index:5;
+}
+nav button{
+  background:transparent;color:#756b60;
+  padding:6px 3px;font-size:10px;flex:1;
+}
+nav button.active{color:var(--red);background:#f4e9dc}
+nav span{display:block;font-size:19px;margin-bottom:3px}
+.page{display:none}
+.page.active{display:block}
+.day{border-left:3px solid var(--gold);padding-left:12px;margin:12px 0}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.amount{font-weight:700;color:var(--red)}
+.progress{height:8px;background:#eadfce;border-radius:9px;overflow:hidden}
+.progress div{height:100%;background:#718b66;width:0}
+.check{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.check input{width:19px;margin:0;accent-color:var(--red)}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:22px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">日本 · IL TUO VIAGGIO</div>
+  <h1>JAPAN TRAVEL 🇯🇵</h1>
+  <p>Febbraio 2027 · 14 giorni · Viaggio in solitaria</p>
+  <div class="hero">
+    <div class="small" style="color:#f2d9c0">LA TUA AVVENTURA GIAPPONESE</div>
+    <strong>ようこそ Japan!</strong>
+    <p>Templi, neve, onsen, cucina e nuove scoperte.</p>
+    <span class="tag">Tokyo</span>
+    <span class="tag">Nagano</span>
+    <span class="tag">Kanazawa</span>
+    <span class="tag">Kyoto</span>
+    <span class="tag">Osaka</span>
+  </div>
+</header>
+
+<main>
+<section id="home" class="page active">
+  <h2>Benvenuto nel tuo viaggio</h2>
+  <div class="card">
+    <div class="row">
+      <div><div class="small">BUDGET OBIETTIVO</div><h2 id="homeBudget">1.800 €</h2></div>
+      <div style="font-size:36px">🏯</div>
+    </div>
+    <div class="small">Spese registrate</div>
+    <h3 id="homeSpent">0 €</h3>
+    <div class="progress"><div id="homeProgress"></div></div>
+  </div>
+  <div class="card">
+    <h3>Il tuo percorso</h3>
+    <p class="small">Tokyo → Nagano → Kanazawa → Shirakawa-go → Takayama → Kyoto → Nara → Osaka → Tokyo</p>
+    <button onclick="showPage('itinerary')">Apri itinerario →</button>
+  </div>
+  <div class="card">
+    <h3>Da ricordare</h3>
+    <p class="small">Nikko e Kamakura sono escluse: questa volta scoprirai nuove zone del Giappone.</p>
+    <p class="small">Le date precise, i voli e le prenotazioni sono ancora da inserire.</p>
+  </div>
+</section>
+
+<section id="itinerary" class="page">
+  <h2>Itinerario · 14 giorni</h2>
+  <div id="days"></div>
+</section>
+
+<section id="hotels" class="page">
+  <h2>Hotel e pernottamenti</h2>
+  <p class="small">Inserisci gli hotel effettivamente prenotati. Le strutture seguenti sono destinazioni di pernottamento, non prenotazioni confermate.</p>
+  <div id="hotelList"></div>
+  <div class="card">
+    <h3>Aggiungi una prenotazione</h3>
+    <label>Hotel / Ryokan</label>
+    <input id="hotelName" placeholder="Nome struttura">
+    <label>Città</label>
+    <input id="hotelCity" placeholder="Es. Kyoto">
+    <label>Indirizzo e dettagli</label>
+    <textarea id="hotelDetails" placeholder="Indirizzo, check-in, codice prenotazione..."></textarea>
+    <button onclick="addHotel()">Salva struttura</button>
+  </div>
+</section>
+
+<section id="budget" class="page">
+  <h2>Budget e spese</h2>
+  <div class="card">
+    <label>Budget totale in euro</label>
+    <input id="budgetInput" type="number" min="0" value="1800">
+    <button onclick="saveBudget()">Aggiorna budget</button>
+    <h3 style="margin-top:18px">Totale speso: <span id="spent">0</span> €</h3>
+    <p class="small">Disponibile: <strong id="remaining">1.800</strong> €</p>
+    <div class="progress"><div id="budgetProgress"></div></div>
+  </div>
+  <div class="card">
+    <h3>Registra una spesa</h3>
+    <label>Descrizione</label>
+    <input id="expenseName" placeholder="Es. Cena a Kyoto">
+    <label>Categoria</label>
+    <select id="expenseCategory">
+      <option>Hotel</option><option>Trasporti</option>
+      <option>Cibo</option><option>Shopping</option>
+      <option>Esperienze</option><option>Altro</option>
+    </select>
+    <label>Importo in euro</label>
+    <input id="expenseAmount" type="number" min="0" step="0.01" placeholder="25">
+    <button onclick="addExpense()">Aggiungi spesa</button>
+  </div>
+  <div id="expenses"></div>
+</section>
+
+<section id="checklist" class="page">
+  <h2>Checklist di viaggio</h2>
+  <div class="card">
+    <div class="row"><h3>Preparazione</h3><span id="checkCount" class="small">0/12</span></div>
+    <div class="progress"><div id="checkProgress"></div></div>
+    <div id="checks"></div>
+  </div>
+</section>
+
+<section id="notes" class="page">
+  <h2>Diario e appunti</h2>
+  <div class="card">
+    <h3>Le tue note</h3>
+    <textarea id="notesText" placeholder="Ristoranti da provare, idee, ricordi, informazioni..."></textarea>
+    <button onclick="saveNotes()">Salva appunti</button>
+    <p class="small" id="notesStatus">Gli appunti sono salvati sul dispositivo.</p>
+  </div>
+  <div class="card">
+    <h3>Frasi giapponesi utili</h3>
+    <p>こんにちは — Konnichiwa — Buongiorno</p>
+    <p>ありがとう — Arigatou — Grazie</p>
+    <p>すみません — Sumimasen — Mi scusi</p>
+    <p>お願いします — Onegaishimasu — Per favore</p>
+    <p>お会計お願いします — Okaikei onegaishimasu — Il conto, per favore</p>
+    <p>英語を話せますか？ — Eigo o hanasemasu ka? — Parla inglese?</p>
+  </div>
+  <div class="card">
+    <h3>Emergenze in Giappone</h3>
+    <p>🚓 Polizia: <strong>110</strong></p>
+    <p>🚑 Ambulanza e vigili del fuoco: <strong>119</strong></p>
+    <p>📞 Japan Visitor Hotline: <strong>050-3816-2787</strong> (verifica disponibilità e accessibilità dall'estero)</p>
+    <p class="small">In caso di emergenza segui sempre le indicazioni delle autorità locali.</p>
+  </div>
+</section>
+</main>
+
+<nav>
+  <button class="active" data-page="home" onclick="showPage('home')"><span>🏯</span>Home</button>
+  <button data-page="itinerary" onclick="showPage('itinerary')"><span>🗾</span>Viaggio</button>
+  <button data-page="hotels" onclick="showPage('hotels')"><span>🏨</span>Hotel</button>
+  <button data-page="budget" onclick="showPage('budget')"><span>💴</span>Budget</button>
+  <button data-page="checklist" onclick="showPage('checklist')"><span>☑️</span>Lista</button>
+  <button data-page="notes" onclick="showPage('notes')"><span>📖</span>Altro</button>
+</nav>
+
+<footer>JAPAN TRAVEL 🇯🇵 · La tua guida personale · 2027</footer>
+
+<script>
+const KEY="japanTravel2027";
+const initial={
+ budget:1800,expenses:[],hotels:[],notes:"",
+ checks:{},
+};
+let data;
+try{
+ data={...initial,...JSON.parse(localStorage.getItem(KEY)||"{}")};
+}catch(e){data={...initial};}
+function persist(){
+ localStorage.setItem(KEY,JSON.stringify(data));
+}
+const days=[
+["Tokyo","Arrivo, sistemazione, passeggiata e cena."],
+["Tokyo","Yanaka, Nezu Shrine e Yanaka Ginza."],
+["Tokyo","Shimokitazawa, Koenji e serata a Golden Gai."],
+["Nagano","Trasferimento da Tokyo e visita al tempio Zenko-ji."],
+["Yudanaka","Jigokudani Snow Monkey Park e notte in ryokan/onsen."],
+["Kanazawa","Trasferimento e visita al quartiere Higashi Chaya."],
+["Kanazawa","Kenrokuen, Nagamachi e mercato Omicho."],
+["Takayama","Autobus via Shirakawa-go e visita al villaggio."],
+["Kyoto","Takayama, trasferimento verso Kyoto e passeggiata."],
+["Kyoto","Fushimi Inari, Kiyomizu-dera e Higashiyama."],
+["Kyoto","Arashiyama, Gion e Pontocho."],
+["Nara / Osaka","Escursione a Nara e serata a Dotonbori."],
+["Tokyo","Rientro da Osaka a Tokyo e pernottamento."],
+["Partenza","Trasferimento in aeroporto e volo di ritorno."]
+];
+const stays=[
+["Tokyo","3 notti iniziali"],
+["Nagano / Yudanaka","2 notti"],
+["Kanazawa","2 notti"],
+["Takayama","1 notte"],
+["Kyoto","3 notti"],
+["Osaka","1 notte"],
+["Tokyo","1 notte finale"]
+];
+function showPage(id){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+ document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===id));
+ document.getElementById(id).classList.add("active");
+ window.scrollTo(0,0);
+}
+function renderDays(){
+ document.getElementById("days").innerHTML=days.map((d,i)=>`
+ <div class="card day">
+ <div class="row"><span class="tag">GIORNO ${i+1}</span><span class="small">${i+1<=3?"Tokyo":i+1<=5?"Nagano":i+1<=7?"Kanazawa":i===8?"Takayama":i<=11?"Kyoto":i===12?"Osaka":"Tokyo"}</span></div>
+ <h3>${d[0]}</h3><p class="small">${d[1]}</p>
+ </div>`).join("");
+}
+function renderHotels(){
+ document.getElementById("hotelList").innerHTML=stays.map(x=>`
+ <div class="card"><h3>🏨 ${x[0]}</h3><p class="small">${x[1]} · Da prenotare</p></div>`).join("")+
+ data.hotels.map((h,i)=>`
+ <div class="card"><div class="row"><h3>${escapeHTML(h.name)}</h3><button class="secondary" onclick="removeHotel(${i})">Elimina</button></div>
+ <p class="small">${escapeHTML(h.city)}<br>${escapeHTML(h.details)}</p></div>`).join("");
+}
+function addHotel(){
+ const name=document.getElementById("hotelName").value.trim();
+ const city=document.getElementById("hotelCity").value.trim();
+ const details=document.getElementById("hotelDetails").value.trim();
+ if(!name||!city){alert("Inserisci almeno nome e città.");return;}
+ data.hotels.push({name,city,details});persist();renderHotels();
+ ["hotelName","hotelCity","hotelDetails"].forEach(id=>document.getElementById(id).value="");
+}
+function removeHotel(i){data.hotels.splice(i,1);persist();renderHotels();}
+function saveBudget(){
+ data.budget=Math.max(0,Number(document.getElementById("budgetInput").value)||0);
+ persist();renderBudget();
+}
+function addExpense(){
+ const name=document.getElementById("expenseName").value.trim();
+ const category=document.getElementById("expenseCategory").value;
+ const amount=Number(document.getElementById("expenseAmount").value);
+ if(!name||!Number.isFinite(amount)||amount<=0){alert("Inserisci descrizione e importo validi.");return;}
+ data.expenses.push({name,category,amount});
+ persist();renderBudget();
+ document.getElementById("expenseName").value="";
+ document.getElementById("expenseAmount").value="";
+}
+function removeExpense(i){data.expenses.splice(i,1);persist();renderBudget();}
+function renderBudget(){
+ const total=data.expenses.reduce((s,e)=>s+e.amount,0);
+ const remaining=data.budget-total;
+ const percent=data.budget?Math.min(100,total/data.budget*100):0;
+ document.getElementById("budgetInput").value=data.budget;
+ document.getElementById("spent").textContent=total.toFixed(2);
+ document.getElementById("remaining").textContent=remaining.toFixed(2);
+ document.getElementById("budgetProgress").style.width=percent+"%";
+ document.getElementById("homeBudget").textContent=data.budget.toFixed(0)+" €";
+ document.getElementById("homeSpent").textContent=total.toFixed(2)+" €";
+ document.getElementById("homeProgress").style.width=percent+"%";
+ document.getElementById("expenses").innerHTML=data.expenses.map((e,i)=>`
+ <div class="card"><div class="row"><div><b>${escapeHTML(e.name)}</b><div class="small">${escapeHTML(e.category)}</div></div>
+ <span class="amount">${e.amount.toFixed(2)} €</span></div>
+ <button class="secondary" onclick="removeExpense(${i})">Elimina</button></div>`).join("");
+}
+const checklist=[
+"Passaporto valido","Assicurazione viaggio","Voli internazionali",
+"Hotel e ryokan prenotati","Autobus Shirakawa-go",
+"Biglietti ferroviari","Carta di pagamento e contanti",
+"eSIM o SIM giapponese","Applicazioni mappe e traduzione",
+"Adattatore prese elettriche","Medicinali personali",
+"Documenti e copie delle prenotazioni"
+];
+function renderChecks(){
+ const done=checklist.filter((_,i)=>data.checks[i]).length;
+ document.getElementById("checkCount").textContent=done+"/"+checklist.length;
+ document.getElementById("checkProgress").style.width=(done/checklist.length*100)+"%";
+ document.getElementById("checks").innerHTML=checklist.map((x,i)=>`
+ <label class="check"><input type="checkbox" ${data.checks[i]?"checked":""} onchange="toggleCheck(${i},this.checked)">${x}</label>`).join("");
+}
+function toggleCheck(i,v){data.checks[i]=v;persist();renderChecks();}
+function saveNotes(){
+ data.notes=document.getElementById("notesText").value;
+ persist();document.getElementById("notesStatus").textContent="Appunti salvati sul dispositivo ✓";
+}
+function escapeHTML(s){
+ return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+document.getElementById("notesText").value=data.notes||"";
+renderDays();renderHotels();renderBudget();renderChecks();
+
+if("serviceWorker" in navigator){
+ window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("./sw.js").catch(console.error);
+ });
+}
+</script>
+</body>
+</html>
