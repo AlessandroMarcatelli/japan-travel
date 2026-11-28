@@ -1,9 +1,12 @@
 
-const CACHE_NAME = "japan-travel-v1";
+const CACHE_NAME = "japan-travel-v2";
 
 const FILES = [
   "./",
   "./index.html",
+  "./styles.css",
+  "./js/trip-data.js",
+  "./js/app.js",
   "./manifest.json",
   "./icon.svg"
 ];
