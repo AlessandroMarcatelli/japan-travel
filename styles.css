@@ -137,9 +137,30 @@ footer { text-align: center; color: var(--muted); font-size: 11px; padding: 22px
 .empty-state { text-align: center; padding: 20px 12px; }
 .home-illustration { font-size: 36px; }
 .budget-total { margin-top: 18px; }
+.section-heading { margin: 18px 0 12px; }
+.section-heading h3, .section-title { margin: 0; }
+.section-title { margin: 22px 0 12px; }
+.stay-card > .row { align-items: flex-start; }
+.stay-form, .checklist-edit-form {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.form-actions { display: flex; align-items: center; gap: 8px; }
+.form-actions input { min-width: 0; margin-bottom: 0; }
+.form-actions button { flex: 0 0 auto; }
+.checklist-add { margin: 14px 0; padding: 12px 0; border-top: 1px solid var(--line); }
+.check-item { padding: 4px 0; border-bottom: 1px solid var(--line); }
+.check-item-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.check { flex: 1; min-width: 0; border-bottom: 0; }
+.check span { overflow-wrap: anywhere; }
+.check-actions { display: flex; gap: 6px; }
+.check-actions button { padding: 8px 10px; font-size: 12px; }
 
 @media (max-width: 380px) {
   nav button { font-size: 9px; }
   nav span { font-size: 17px; }
   .row { align-items: flex-start; }
+  .check-item-row { align-items: flex-start; flex-direction: column; }
+  .check-actions { align-self: flex-end; }
 }

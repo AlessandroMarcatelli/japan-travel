@@ -4,8 +4,16 @@ window.TripData = {
     expenses: [],
     hotels: [],
     notes: "",
-    checks: {}
+    checks: {},
+    trip: {
+      month: "Febbraio",
+      year: 2027
+    }
   },
+  months: [
+    "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
+    "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
+  ],
   days: [
     { city: "Tokyo", activity: "Arrivo, sistemazione, passeggiata e cena.", maps: "" },
     { city: "Tokyo", activity: "Yanaka, Nezu Shrine e Yanaka Ginza.", maps: "" },
@@ -23,13 +31,13 @@ window.TripData = {
     { city: "Partenza", activity: "Trasferimento in aeroporto e volo di ritorno.", maps: "" }
   ],
   stays: [
-    ["Tokyo", "3 notti iniziali"],
-    ["Nagano / Yudanaka", "2 notti"],
-    ["Kanazawa", "2 notti"],
-    ["Takayama", "1 notte"],
-    ["Kyoto", "3 notti"],
-    ["Osaka", "1 notte"],
-    ["Tokyo", "1 notte finale"]
+    { city: "Tokyo", nights: 3 },
+    { city: "Nagano / Yudanaka", nights: 2 },
+    { city: "Kanazawa", nights: 2 },
+    { city: "Takayama", nights: 1 },
+    { city: "Kyoto", nights: 3 },
+    { city: "Osaka", nights: 1 },
+    { city: "Tokyo", nights: 1 }
   ],
   checklist: [
     "Passaporto valido",

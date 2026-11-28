@@ -1,22 +1,101 @@
 const KEY = "japanTravel2027";
-const { initial, days: defaultDays, stays, checklist } = window.TripData;
+const { initial, days: defaultDays, stays: defaultStays, checklist: defaultChecklist, months } = window.TripData;
 let data;
 let editingDayIndex = null;
 let addingDay = false;
+let editingStayIndex = null;
+let addingStay = false;
+let editingHotelIndex = null;
+let editingChecklistIndex = null;
 
 try {
-  data = { ...initial, ...JSON.parse(localStorage.getItem(KEY) || "{}") };
+  const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+  data = { ...initial, ...saved };
 } catch (error) {
   console.error("Impossibile leggere i dati di viaggio salvati.", error);
   data = { ...initial };
 }
 
+data.trip = { ...initial.trip, ...(data.trip || {}) };
+
 if (!Array.isArray(data.itinerary)) {
   data.itinerary = defaultDays.map(day => ({ ...day }));
 }
 
+if (!Array.isArray(data.stays)) {
+  data.stays = defaultStays.map(stay => ({ ...stay }));
+}
+
+if (!Array.isArray(data.checklist)) {
+  const legacyChecks = data.checks || {};
+  data.checklist = defaultChecklist.map((text, index) => ({
+    id: `check-${index + 1}`,
+    text
+  }));
+  data.checks = Object.fromEntries(data.checklist.map((item, index) => [
+    item.id,
+    Boolean(legacyChecks[index])
+  ]));
+} else {
+  data.checklist = data.checklist.map((item, index) => ({
+    id: String(item.id || `check-${index + 1}`),
+    text: String(item.text || "")
+  }));
+  data.checks = data.checks || {};
+}
+
 function persist() {
   localStorage.setItem(KEY, JSON.stringify(data));
+}
+
+function renderTripSettings() {
+  document.getElementById("tripMonth").innerHTML = months.map(month => `
+    <option value="${month}">${month}</option>`).join("");
+  document.getElementById("tripMonth").value = data.trip.month;
+  document.getElementById("tripYear").value = data.trip.year;
+  document.getElementById("tripDuration").value = data.itinerary.length;
+  document.getElementById("tripSummary").textContent =
+    `${data.trip.month} ${data.trip.year} · ${data.itinerary.length} giorni · Viaggio in solitaria`;
+  const route = data.itinerary
+    .map(day => String(day.city || "").trim())
+    .filter((city, index, cities) => city && city !== cities[index - 1]);
+  document.getElementById("tripRoute").textContent =
+    route.length ? route.join(" → ") : "Aggiungi le tappe del tuo viaggio all’itinerario.";
+  document.getElementById("tripDestinations").innerHTML = [...new Set(route)]
+    .map(city => `<span class="tag">${escapeHTML(city)}</span>`).join("");
+}
+
+function saveTripDetails(event) {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  const month = String(formData.get("month") || "");
+  const year = Number(formData.get("year"));
+  const duration = Number(formData.get("duration"));
+  if (!months.includes(month) || !Number.isInteger(year) || year < 2026 || year > 2200
+    || !Number.isInteger(duration) || duration < 1 || duration > 365) {
+    alert("Controlla mese, anno e durata del viaggio.");
+    renderTripSettings();
+    return;
+  }
+
+  const currentDuration = data.itinerary.length;
+  if (duration < currentDuration
+    && !confirm(`Riducendo la durata verranno eliminate le ultime ${currentDuration - duration} giornate dell'itinerario. Continuare?`)) {
+    renderTripSettings();
+    return;
+  }
+
+  if (duration < currentDuration) {
+    data.itinerary.splice(duration);
+  } else {
+    while (data.itinerary.length < duration) {
+      data.itinerary.push({ city: "", activity: "", maps: "" });
+    }
+  }
+  data.trip = { month, year };
+  persist();
+  renderTripSettings();
+  renderDays();
 }
 
 function showPage(id) {
@@ -76,7 +155,7 @@ function renderDays() {
       <article class="card day-card">
         <div class="row">
           <span class="tag">GIORNO ${index + 1}</span>
-          <span class="small">${escapeHTML(day.city)}</span>
+          <span class="small">${escapeHTML(day.city || "Da definire")}</span>
         </div>
         <p class="small day-activity">${escapeHTML(day.activity)}</p>
         ${mapLink ? `<a class="maps-link" href="${escapeHTML(mapLink)}" target="_blank" rel="noopener noreferrer">Apri la zona su Google Maps ↗</a>` : ""}
@@ -133,38 +212,157 @@ function saveDay(event, index) {
   persist();
   editingDayIndex = null;
   addingDay = false;
+  renderTripSettings();
   renderDays();
 }
 
 function removeDay(index) {
+  if (data.itinerary.length <= 1) {
+    alert("L'itinerario deve contenere almeno una giornata.");
+    return;
+  }
   if (!confirm(`Vuoi eliminare il giorno ${index + 1} dall'itinerario?`)) return;
   data.itinerary.splice(index, 1);
   persist();
+  renderTripSettings();
   renderDays();
 }
 
-function renderHotels() {
-  document.getElementById("hotelList").innerHTML = stays.map(stay => `
-    <div class="card"><h3>🏨 ${stay[0]}</h3><p class="small">${stay[1]} · Da prenotare</p></div>`).join("") +
-    data.hotels.map((hotel, index) => `
-      <div class="card"><div class="row"><h3>${escapeHTML(hotel.name)}</h3><button class="secondary" onclick="removeHotel(${index})">Elimina</button></div>
-      <p class="small">${escapeHTML(hotel.city)}<br>${escapeHTML(hotel.details)}</p></div>`).join("");
+function stayForm(stay = { city: "", nights: 1 }, index = "null") {
+  return `
+    <form class="stay-form" onsubmit="saveStay(event, ${index})">
+      <label>Città o tappa</label>
+      <input name="city" value="${escapeHTML(stay.city)}" placeholder="Es. Kyoto" required>
+      <label>Notti</label>
+      <input name="nights" type="number" min="1" max="365" value="${stay.nights}" required>
+      <div class="form-actions">
+        <button type="submit">Salva tappa</button>
+        <button type="button" class="secondary" onclick="cancelStayEdit()">Annulla</button>
+      </div>
+    </form>`;
 }
 
-function addHotel() {
-  const name = document.getElementById("hotelName").value.trim();
-  const city = document.getElementById("hotelCity").value.trim();
-  const details = document.getElementById("hotelDetails").value.trim();
-  if (!name || !city) { alert("Inserisci almeno nome e città."); return; }
-  data.hotels.push({ name, city, details });
+function renderStays() {
+  document.getElementById("stayList").innerHTML = data.stays.map((stay, index) => `
+    <div class="card stay-card">
+      <div class="row">
+        <div><h3>🏨 ${escapeHTML(stay.city)}</h3><p class="small">${stay.nights} ${stay.nights === 1 ? "notte" : "notti"} · Da prenotare</p></div>
+        <div class="day-actions">
+          <button type="button" class="secondary" onclick="editStay(${index})">Modifica</button>
+          <button type="button" class="secondary" onclick="removeStay(${index})">Elimina</button>
+        </div>
+      </div>
+      ${editingStayIndex === index ? stayForm(stay, index) : ""}
+    </div>`).join("") +
+    (addingStay ? `<div class="card">${stayForm()}</div>` : "");
+}
+
+function addStay() {
+  addingStay = true;
+  editingStayIndex = null;
+  renderStays();
+  document.querySelector("#stayList .stay-form input[name='city']").focus();
+}
+
+function editStay(index) {
+  editingStayIndex = index;
+  addingStay = false;
+  renderStays();
+  document.querySelector("#stayList .stay-form input[name='city']").focus();
+}
+
+function cancelStayEdit() {
+  editingStayIndex = null;
+  addingStay = false;
+  renderStays();
+}
+
+function saveStay(event, index) {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  const stay = {
+    city: String(formData.get("city") || "").trim(),
+    nights: Number(formData.get("nights"))
+  };
+  if (!stay.city || !Number.isInteger(stay.nights) || stay.nights < 1 || stay.nights > 365) {
+    alert("Inserisci una tappa e un numero di notti valido.");
+    return;
+  }
+  if (Number.isInteger(index)) data.stays[index] = stay;
+  else data.stays.push(stay);
+  persist();
+  editingStayIndex = null;
+  addingStay = false;
+  renderStays();
+}
+
+function removeStay(index) {
+  if (!confirm(`Vuoi eliminare la tappa ${data.stays[index].city}?`)) return;
+  data.stays.splice(index, 1);
+  persist();
+  renderStays();
+}
+
+function renderHotels() {
+  renderStays();
+  document.getElementById("hotelList").innerHTML = data.hotels.map((hotel, index) => `
+    <div class="card"><div class="row"><h3>${escapeHTML(hotel.name)}</h3>
+      <div class="day-actions">
+        <button type="button" class="secondary" onclick="editHotel(${index})">Modifica</button>
+        <button type="button" class="secondary" onclick="removeHotel(${index})">Elimina</button>
+      </div>
+    </div>
+    <p class="small">${escapeHTML(hotel.city)}${hotel.details ? `<br>${escapeHTML(hotel.details)}` : ""}</p></div>`).join("") ||
+    '<div class="card empty-state small">Non hai ancora aggiunto prenotazioni.</div>';
+}
+
+function saveHotel(event) {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  const hotel = {
+    name: String(formData.get("name") || "").trim(),
+    city: String(formData.get("city") || "").trim(),
+    details: String(formData.get("details") || "").trim()
+  };
+  if (!hotel.name || !hotel.city) {
+    alert("Inserisci almeno il nome della struttura e la città.");
+    return;
+  }
+  if (Number.isInteger(editingHotelIndex)) data.hotels[editingHotelIndex] = hotel;
+  else data.hotels.push(hotel);
+  persist();
+  cancelHotelEdit();
+  renderHotels();
+}
+
+function editHotel(index) {
+  const hotel = data.hotels[index];
+  editingHotelIndex = index;
+  document.getElementById("hotelName").value = hotel.name;
+  document.getElementById("hotelCity").value = hotel.city;
+  document.getElementById("hotelDetails").value = hotel.details || "";
+  document.getElementById("hotelFormTitle").textContent = "Modifica prenotazione";
+  document.getElementById("hotelSubmit").textContent = "Aggiorna prenotazione";
+  document.getElementById("cancelHotelEdit").hidden = false;
+  document.getElementById("hotelForm").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function cancelHotelEdit() {
+  editingHotelIndex = null;
+  document.getElementById("hotelForm").reset();
+  document.getElementById("hotelFormTitle").textContent = "Aggiungi una prenotazione";
+  document.getElementById("hotelSubmit").textContent = "Salva struttura";
+  document.getElementById("cancelHotelEdit").hidden = true;
+}
+
+function removeHotel(index) {
+  if (!confirm(`Vuoi eliminare la prenotazione di ${data.hotels[index].name}?`)) return;
+  if (editingHotelIndex === index) cancelHotelEdit();
+  else if (editingHotelIndex > index) editingHotelIndex -= 1;
+  data.hotels.splice(index, 1);
   persist();
   renderHotels();
-  ["hotelName", "hotelCity", "hotelDetails"].forEach(id => {
-    document.getElementById(id).value = "";
-  });
 }
-
-function removeHotel(index) { data.hotels.splice(index, 1); persist(); renderHotels(); }
 
 function saveBudget() {
   data.budget = Math.max(0, Number(document.getElementById("budgetInput").value) || 0);
@@ -207,14 +405,88 @@ function renderBudget() {
 }
 
 function renderChecks() {
-  const done = checklist.filter((_, index) => data.checks[index]).length;
-  document.getElementById("checkCount").textContent = done + "/" + checklist.length;
-  document.getElementById("checkProgress").style.width = (done / checklist.length * 100) + "%";
-  document.getElementById("checks").innerHTML = checklist.map((item, index) => `
-    <label class="check"><input type="checkbox" ${data.checks[index] ? "checked" : ""} onchange="toggleCheck(${index},this.checked)">${item}</label>`).join("");
+  const done = data.checklist.filter(item => data.checks[item.id]).length;
+  document.getElementById("checkCount").textContent = done + "/" + data.checklist.length;
+  document.getElementById("checkProgress").style.width =
+    (data.checklist.length ? done / data.checklist.length * 100 : 0) + "%";
+  document.getElementById("checks").innerHTML = data.checklist.map((item, index) => `
+    <div class="check-item">
+      <div class="check-item-row">
+        <label class="check">
+          <input type="checkbox" ${data.checks[item.id] ? "checked" : ""}
+            onchange="toggleCheck(${index}, this.checked)">
+          <span>${escapeHTML(item.text)}</span>
+        </label>
+        <div class="check-actions">
+          <button type="button" class="secondary" onclick="editChecklistItem(${index})">Modifica</button>
+          <button type="button" class="secondary" onclick="removeChecklistItem(${index})">Elimina</button>
+        </div>
+      </div>
+      ${editingChecklistIndex === index ? checklistEditForm(item, index) : ""}
+    </div>`).join("") ||
+    '<p class="small empty-state">Checklist vuota: aggiungi un promemoria qui sopra.</p>';
 }
 
-function toggleCheck(index, value) { data.checks[index] = value; persist(); renderChecks(); }
+function checklistEditForm(item, index = "null") {
+  return `
+    <form class="checklist-edit-form" onsubmit="saveChecklistItem(event, ${index})">
+      <label>Testo del promemoria</label>
+      <input name="text" value="${escapeHTML(item.text)}" required>
+      <div class="form-actions">
+        <button type="submit">Salva</button>
+        <button type="button" class="secondary" onclick="cancelChecklistEdit()">Annulla</button>
+      </div>
+    </form>`;
+}
+
+function saveChecklistItem(event, index) {
+  event.preventDefault();
+  const text = String(new FormData(event.currentTarget).get("text") || "").trim();
+  if (!text) {
+    alert("Inserisci il testo del promemoria.");
+    return;
+  }
+  if (Number.isInteger(index)) {
+    data.checklist[index].text = text;
+  } else {
+    const id = `check-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    data.checklist.push({ id, text });
+    data.checks[id] = false;
+    document.getElementById("newChecklistItem").value = "";
+  }
+  editingChecklistIndex = null;
+  persist();
+  renderChecks();
+}
+
+function editChecklistItem(index) {
+  editingChecklistIndex = index;
+  renderChecks();
+  document.querySelector(".checklist-edit-form input[name='text']").focus();
+}
+
+function cancelChecklistEdit() {
+  editingChecklistIndex = null;
+  renderChecks();
+}
+
+function removeChecklistItem(index) {
+  const item = data.checklist[index];
+  if (!confirm(`Vuoi eliminare "${item.text}" dalla checklist?`)) return;
+  delete data.checks[item.id];
+  data.checklist.splice(index, 1);
+  editingChecklistIndex = null;
+  persist();
+  renderChecks();
+}
+
+function toggleCheck(index, value) {
+  const item = data.checklist[index];
+  if (!item) return;
+  data.checks[item.id] = value;
+  persist();
+  renderChecks();
+}
 
 function saveNotes() {
   data.notes = document.getElementById("notesText").value;
@@ -233,6 +505,7 @@ function escapeHTML(value) {
 }
 
 document.getElementById("notesText").value = data.notes || "";
+renderTripSettings();
 renderDays();
 renderHotels();
 renderBudget();

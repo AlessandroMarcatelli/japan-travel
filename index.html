@@ -16,16 +16,12 @@
 <header>
   <div class="brand">日本 · IL TUO VIAGGIO</div>
   <h1>JAPAN TRAVEL 🇯🇵</h1>
-  <p>Febbraio 2027 · 14 giorni · Viaggio in solitaria</p>
+  <p id="tripSummary">Febbraio 2027 · 14 giorni · Viaggio in solitaria</p>
   <div class="hero">
     <div class="small hero-label">LA TUA AVVENTURA GIAPPONESE</div>
     <strong>ようこそ Japan!</strong>
     <p>Templi, neve, onsen, cucina e nuove scoperte.</p>
-    <span class="tag">Tokyo</span>
-    <span class="tag">Nagano</span>
-    <span class="tag">Kanazawa</span>
-    <span class="tag">Kyoto</span>
-    <span class="tag">Osaka</span>
+    <div id="tripDestinations" aria-label="Destinazioni del viaggio"></div>
   </div>
 </header>
 
@@ -42,8 +38,21 @@
     <div class="progress"><div id="homeProgress"></div></div>
   </div>
   <div class="card">
+    <h3>Dettagli del viaggio</h3>
+    <p class="small">La durata segue il numero di giornate dell’itinerario.</p>
+    <form id="tripDetailsForm" onsubmit="saveTripDetails(event)">
+      <label for="tripMonth">Mese</label>
+      <select id="tripMonth" name="month" required></select>
+      <label for="tripYear">Anno</label>
+      <input id="tripYear" name="year" type="number" min="2026" max="2200" required>
+      <label for="tripDuration">Durata (giorni)</label>
+      <input id="tripDuration" name="duration" type="number" min="1" max="365" required>
+      <button type="submit">Salva dettagli</button>
+    </form>
+  </div>
+  <div class="card">
     <h3>Il tuo percorso</h3>
-    <p class="small">Tokyo → Nagano → Kanazawa → Shirakawa-go → Takayama → Kyoto → Nara → Osaka → Tokyo</p>
+    <p id="tripRoute" class="small"></p>
     <button onclick="showPage('itinerary')">Apri itinerario →</button>
   </div>
   <div class="card">
@@ -64,17 +73,28 @@
 
 <section id="hotels" class="page">
   <h2>Hotel e pernottamenti</h2>
-  <p class="small">Inserisci gli hotel effettivamente prenotati. Le strutture seguenti sono destinazioni di pernottamento, non prenotazioni confermate.</p>
+  <p class="small">Organizza le tappe e le notti, poi aggiungi le strutture effettivamente prenotate.</p>
+  <div class="row section-heading">
+    <h3>Tappe e pernottamenti previsti</h3>
+    <button type="button" onclick="addStay()">+ Aggiungi tappa</button>
+  </div>
+  <div id="stayList"></div>
+  <h3 class="section-title">Prenotazioni confermate</h3>
   <div id="hotelList"></div>
   <div class="card">
-    <h3>Aggiungi una prenotazione</h3>
-    <label>Hotel / Ryokan</label>
-    <input id="hotelName" placeholder="Nome struttura">
-    <label>Città</label>
-    <input id="hotelCity" placeholder="Es. Kyoto">
-    <label>Indirizzo e dettagli</label>
-    <textarea id="hotelDetails" placeholder="Indirizzo, check-in, codice prenotazione..."></textarea>
-    <button onclick="addHotel()">Salva struttura</button>
+    <h3 id="hotelFormTitle">Aggiungi una prenotazione</h3>
+    <form id="hotelForm" onsubmit="saveHotel(event)">
+      <label for="hotelName">Hotel / Ryokan</label>
+      <input id="hotelName" name="name" placeholder="Nome struttura" required>
+      <label for="hotelCity">Città</label>
+      <input id="hotelCity" name="city" placeholder="Es. Kyoto" required>
+      <label for="hotelDetails">Indirizzo e dettagli</label>
+      <textarea id="hotelDetails" name="details" placeholder="Indirizzo, check-in, codice prenotazione..."></textarea>
+      <div class="form-actions">
+        <button id="hotelSubmit" type="submit">Salva struttura</button>
+        <button id="cancelHotelEdit" type="button" class="secondary" onclick="cancelHotelEdit()" hidden>Annulla</button>
+      </div>
+    </form>
   </div>
 </section>
 
@@ -110,6 +130,13 @@
   <div class="card">
     <div class="row"><h3>Preparazione</h3><span id="checkCount" class="small">0/12</span></div>
     <div class="progress"><div id="checkProgress"></div></div>
+    <form id="checklistAddForm" class="checklist-add" onsubmit="saveChecklistItem(event)">
+      <label for="newChecklistItem">Aggiungi un promemoria</label>
+      <div class="form-actions">
+        <input id="newChecklistItem" name="text" placeholder="Es. Prenotare i biglietti" required>
+        <button type="submit">Aggiungi</button>
+      </div>
+    </form>
     <div id="checks"></div>
   </div>
 </section>
@@ -150,7 +177,7 @@
   <button data-page="notes" onclick="showPage('notes')"><span>📖</span>Altro</button>
 </nav>
 
-<footer>JAPAN TRAVEL 🇯🇵 · La tua guida personale · 2027</footer>
+<footer>JAPAN TRAVEL 🇯🇵 · La tua guida personale</footer>
 
 <script src="./js/trip-data.js"></script>
 <script src="./js/app.js"></script>

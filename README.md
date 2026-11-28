@@ -10,4 +10,4 @@ Guida personale per il viaggio in Giappone, utilizzabile anche offline.
 - `js/app.js`: rendering, modifiche e salvataggio locale dei dati.
 - `sw.js`: cache offline dell'applicazione.
 
-Le modifiche all'itinerario vengono salvate nel browser sul dispositivo. Per ogni giornata puoi personalizzare città o zona, programma e posizione o link di Google Maps.
+Le modifiche vengono salvate nel browser sul dispositivo. Puoi cambiare mese e anno del viaggio, allineare la durata alle giornate dell'itinerario, gestire tappe e prenotazioni hotel e aggiungere, modificare o rimuovere elementi della checklist. Per ogni giornata puoi personalizzare città o zona, programma e posizione o link di Google Maps.

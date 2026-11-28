@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "japan-travel-v2";
+const CACHE_NAME = "japan-travel-v3";
 
 const FILES = [
   "./",
